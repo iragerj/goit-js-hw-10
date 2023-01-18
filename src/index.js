@@ -14,42 +14,35 @@ input.addEventListener('input', debounceInput);
 function onInput(e) {
   const countryName = e.target.value.trim();
 
-  if (countryName.length > 0) {
-    clearHTML();
-
-    fetchCountries(countryName)
-      .then(response => {
-        if (response.length > 10) {
-          return Notiflix.Notify.info(
-            'Too many matches found. Please enter a more specific name.'
-          );
-        }
-
-        if (response.length >= 2) {
-          showCountryList(response);
-        } else {
-          showCountryInfo(response);
-        }
-      })
-      .catch(() => {
-        return Notiflix.Notify.failure(
-          'Oops, there is no country with that name'
-        );
-      });
+  if (!countryName) {
+    return;
   }
+
+  clearHTML();
+
+  fetchCountries(countryName)
+    .then(response => {
+      if (response.length > 10) {
+        return Notiflix.Notify.info(
+          'Too many matches found. Please enter a more specific name.'
+        );
+      }
+
+      if (response.length >= 2) {
+        showCountryList(response);
+      } else {
+        showCountryInfo(response);
+      }
+    })
+    .catch(() => {
+      return Notiflix.Notify.failure(
+        'Oops, there is no country with that name'
+      );
+    });
 }
 
 function getLanguages(languagesObj) {
-  let langString = '';
-
-  for (let key in languagesObj) {
-    if (!langString) {
-      langString = languagesObj[key];
-    } else {
-      langString = langString + ', ' + languagesObj[key];
-    }
-  }
-  return langString;
+  return Object.values(languagesObj).join(', ');
 }
 
 function clearHTML() {
@@ -58,18 +51,18 @@ function clearHTML() {
 }
 
 function showCountryList(response) {
-  let HTML = '';
-
-  response.forEach(country => {
-    const countryHTML = `<li><img src=${country.flags.svg}/><span>${country.altSpellings[1]}</span></li>`;
-    HTML = HTML + countryHTML;
-  });
+  let HTML = response
+    .map(
+      country =>
+        `<li><img src="${country.flags.svg}"/><span>${country.altSpellings[1]}</span></li>`
+    )
+    .join('');
   countryList.insertAdjacentHTML('afterbegin', HTML);
 }
 
 function showCountryInfo(response) {
   const country = response[0];
-  const countryHTML = `<ul><li><img src=${country.flags.svg}/><span>${
+  const countryHTML = `<ul><li><img src="${country.flags.svg}"/><span>${
     country.altSpellings[1]
   }</span></li><li><span>Capital: </span>${
     country.capital
